@@ -1,7 +1,7 @@
 
 import Nav from "./Nav.jsx"
 import Home from "./Home/Home.jsx"
-import { Routes, Route, BrowserRouter as Router } from "react-router-dom";
+import { HashRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Adoption from './Adoption';
 import Breed from './Breed';
 import Facts from './Facts.jsx';
@@ -14,11 +14,13 @@ function App() {
       <Nav />
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="*" element={<Home />} />
-        <Route path="dogs/home" element ={<Home/>}/>
-        <Route path="dogs/adoption" element ={<Adoption/>}/>
-        <Route path="dogs/breed" element ={<Breed/>}/>
-        <Route path="dogs/facts" element ={<Facts/>}/>
+        <Route path="/dogs" element ={<Home/>}/>
+        <Route path="/dogs/home" element ={<Home/>}/>
+        <Route path="/dogs/adoption" element ={<Adoption/>}/>
+        <Route path="/dogs/breed" element ={<Breed/>}/>
+        <Route path="/dogs/facts" element ={<Facts/>}/>
+
+        <Route path="*" element={<Navigate to="/dogs" />} />
       </Routes>
     </Router>
     
