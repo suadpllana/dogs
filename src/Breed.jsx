@@ -1,66 +1,80 @@
-import React from 'react'
-import {useState , useEffect } from "react";
-const Breed = () => {
-  const [breed , setBreed ] = useState("")
+import React from "react";
+import { useState, useEffect } from "react";
 
-  const [allDogs , setAllDogs] = useState([])
+import { useNavigate } from "react-router-dom";
+const Breed = ({ dogId, setDogId, setFilteredDog }) => {
+  const [breed, setBreed] = useState("");
+  const [allDogs, setAllDogs] = useState([]);
+  const [storedDogsData, setStoredDogsData] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-
-  async function fetchDogImage(dogName){
-    try{
-      const url = `https://dog.ceo/api/breed/${dogName.trim().toLowerCase()}/images/random`
-      const response = await fetch(url);
-      const data = await response.json();
-      if(data.code === 404){
-        setBreed("")
-    
-        return;
-  
-      }
-      setBreed(data.message)
-  
-    }
-    catch(err){
-      console.error(err);
-    }
- 
-  }
- 
-
+  const navigate = useNavigate();
   useEffect(() => {
-    async function getAllDogs(){
-      const url = `https://dog.ceo/api/breeds/list/all`
+    async function getAllDogBreeds() {
+      setLoading(true);
+      const url = "https://api.thedogapi.com/v1/breeds";
       const response = await fetch(url);
       const data = await response.json();
-        const array = Array(data.message)
-        const properties = array.flatMap(Object.keys);
-        setAllDogs(properties)
+
+      setAllDogs(data);
+      setStoredDogsData(data);
+      setLoading(false);
     }
-    getAllDogs()
-  } , [])
- 
+    getAllDogBreeds();
+  }, []);
+
+  function getDogById(id) {
+    const filteredDog = allDogs.filter((dog) => dog.id === id);
+    setFilteredDog(filteredDog);
+    setDogId(id);
+    navigate(`/dogs/breed/${id}`);
+  }
+  function filterBreed(text) {
+    const filterDogByName = storedDogsData.filter((dog) =>
+      dog.name.toLowerCase().includes(text.toLowerCase())
+    );
+    setAllDogs(filterDogByName);
+  }
 
   return (
     <div className="container">
-    
       <div className="content">
-      <h1>Dog Breeds</h1>
-      <h2>Get an image of your favorite dog breed</h2>
-      <select className="search-button" onChange={(e) => fetchDogImage(e.target.value)}>
-          <option value="breed">Breeds</option>
-       
-      {allDogs.map(dog => (
-        <option key={dog} value={dog}>{dog.slice(0,1).toUpperCase() + dog.slice(1,dog.length).toLowerCase()}</option>
-      ))}
-       </select>
-     <br />
+        <h1>Dog Breeds</h1>
 
-      {breed && <img className="dogImage" src={breed} />  }
-
-      </div>
+        <br />
+        <input
+          className="search-input"
+          type="text"
+          onChange={(e) => filterBreed(e.target.value)}
+          placeholder="Search for a dog/breed"
+        />
+        <button className="search-button">Search</button>
+          {!loading ?
+            <div className="breedContainer">
+            {allDogs.length > 0 &&
+              allDogs.map((dog) => (
+                <div
+                  key={dog.reference_image_id}
+                  className="dog-breed"
+                  onClick={() => getDogById(dog.id)}
+                >
+                  {dog.reference_image_id && (
+                    <img
+                      src={`https://cdn2.thedogapi.com/images/${dog.reference_image_id}.jpg`}
+                      alt=""
+                    />
+                  )}
+  
+                  <h4>{dog.name}</h4>
+                  <p>Bred for {dog.bred_for}</p>
+                </div>
+              ))}
+          </div>
+           : <p>Loading...</p>}
       
+      </div>
     </div>
-  )
-}
+  );
+};
 
-export default Breed
+export default Breed;
